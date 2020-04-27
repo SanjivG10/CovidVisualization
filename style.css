@@ -1,0 +1,11 @@
+#defaultCanvas0 {
+  position: absolute;
+  top: 0;
+  left: 10;
+}
+
+#myTextContainer {
+  position: absolute;
+  top: 0;
+  right: 300;
+}
