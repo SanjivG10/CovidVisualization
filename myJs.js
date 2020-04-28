@@ -9,17 +9,39 @@ const quarantinedVal = document.getElementById("theyareQuarantinedNumbers");
 
 let borders = [];
 let agents = [];
+let maxIteration = 0;
 let currentBorder, firstPosX, firstPosY, secondPosX, secondPosY;
-let canMakeThisRect = true;
-const totalPopulation = 19;
-totalPopulationContainer.innerHTML = totalPopulation + 1;
-initialCase.innerHTML = 1;
+const totalPopulation = 20;
+const initialTotalInfected = 1;
+totalPopulationContainer.innerHTML = totalPopulation;
+initialCase.innerHTML = initialTotalInfected;
 
 function setup() {
   createCanvas(window.innerWidth / 2, window.innerHeight * 0.9);
+
   agents.push(new Human(100, height / 2, true));
-  for (let i = 0; i < totalPopulation; i++) {
-    agents.push(new Human(random(width * 0.2, width), random(0, height)));
+
+  while (agents.length < totalPopulation - initialTotalInfected) {
+    let overlapping = false;
+    const newHuman = new Human(random(width * 0.2, width), random(0, height));
+    for (let j = 0; j < agents.length; j++) {
+      const otherHuman = agents[j];
+      if (otherHuman.detectCollision(newHuman)) {
+        overlapping = true;
+        break;
+      } else {
+        overlapping = false;
+      }
+    }
+
+    if (!overlapping) {
+      agents.push(newHuman);
+    }
+
+    maxIteration++;
+    if (maxIteration > 10000) {
+      break;
+    }
   }
 }
 
@@ -47,6 +69,10 @@ function draw() {
   quarantinedNumberPop = 0;
 
   for (let i = 0; i < borders.length; i++) {
+    if (borders[i].color == "red") {
+      borders.splice(i, 1);
+      continue;
+    }
     borders[i].show();
 
     for (let j = 0; j < agents.length; j++) {
@@ -58,12 +84,16 @@ function draw() {
 
   // we need to handle the collision between two balls!
   for (let i = 0; i < agents.length; i++) {
-    for (let j = i; j < agents.length; j++) {
+    for (let j = i + 1; j < agents.length; j++) {
       if (agents[i].detectCollision(agents[j])) {
         if (agents[i].infected || agents[j].infected) {
           agents[i].infected = true;
           agents[j].infected = true;
         }
+        // console.log(-1 * agents[i].vel.x, -1 * agents[i].vel.y);
+        agents[i].reverseDirection();
+        agents[j].reverseDirection();
+        // agents[j].reverseDirection();
       }
     }
   }
@@ -76,17 +106,15 @@ function mousePressed() {
 
 function mouseReleased() {
   if (currentBorder) {
-    if (canMakeThisRect) {
-      borders.push(currentBorder);
-    }
+    borders.push(currentBorder);
+
     for (let j = 0; j < agents.length; j++) {
-      if (canMakeThisRect) {
+      {
         currentBorder.checkQuarantine(agents[j]);
       }
     }
   }
   currentBorder = null;
-  canMakeThisRect = false;
 }
 
 function mouseDragged() {
@@ -95,11 +123,8 @@ function mouseDragged() {
 
   // this is where I check whether the current border collides with remaining border or not
   currentBorder = new Border(firstPosX, firstPosY, secondPosX, secondPosY);
+
   for (let i = 0; i < borders.length; i++) {
-    if (borders[i].checkIntersection(currentBorder)) {
-      canMakeThisRect = false;
-    } else {
-      canMakeThisRect = true;
-    }
+    borders[i].checkIntersection(currentBorder);
   }
 }

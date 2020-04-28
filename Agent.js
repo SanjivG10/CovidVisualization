@@ -1,7 +1,8 @@
 class Human {
   constructor(x = width / 2, y = height / 2, infected = false) {
     this.pos = createVector(x, y);
-    this.vel = p5.Vector.random2D();
+    this.vel = createVector(0, 0);
+    this.acc = p5.Vector.random2D();
     this.infected = infected;
     this.size = 20;
     this.inQuarantine = false;
@@ -21,10 +22,10 @@ class Human {
 
   update = () => {
     if (!this.inQuarantine) {
-      this.vel.add(p5.Vector.random2D());
-      this.vel.limit(4);
+      this.vel.add(this.acc);
       this.pos.add(this.vel);
       this.checkBorder();
+      this.acc.mult(0);
     }
   };
 
@@ -32,8 +33,6 @@ class Human {
     if (
       dist(this.pos.x, this.pos.y, target.pos.x, target.pos.y) <= target.size
     ) {
-      this.reverseDirection();
-      target.reverseDirection();
       return true;
     }
   };
@@ -50,10 +49,10 @@ class Human {
 
   reverseDirection = (x = true, y = true) => {
     if (x) {
-      this.vel.x = -this.vel.x;
+      this.vel = createVector(-1 * this.vel.x, this.vel.y);
     }
     if (y) {
-      this.vel.y = -this.vel.y;
+      this.vel = createVector(this.vel.x, -1 * this.vel.y);
     }
   };
 }

@@ -9,7 +9,18 @@ class Border {
     this.sposX = sposX;
     this.sposY = sposY;
     this.color = "white";
+    this.checkDim();
   }
+
+  checkDim = () => {
+    if (
+      Math.abs(this.fposX - this.sposX) < 10 ||
+      Math.abs(this.fposY - this.sposY) < 10
+    ) {
+      this.color = "red";
+      return false;
+    }
+  };
 
   show = () => {
     push();
@@ -20,7 +31,7 @@ class Border {
     let height = Math.abs(this.fposY - this.sposY);
 
     stroke(this.color);
-    strokeWeight(2);
+    strokeWeight(1);
     rect(0, 0, width, height);
     pop();
   };
@@ -53,6 +64,9 @@ class Border {
   };
 
   checkQuarantine = (target) => {
+    if (this.color == "red") {
+      return;
+    }
     if (this.checkCollision(target)) {
       if (
         Math.abs(this.fposX - target.pos.x) < target.size / 2 ||
@@ -75,7 +89,6 @@ class Border {
       currentXPositionTarget + target.size / 2 > this.fposX &&
       currentXPositionTarget - target.size / 2 < this.sposX
     ) {
-      //chance of collision!
       if (
         currentYPositionTarget + target.size / 2 > this.fposY &&
         currentYPositionTarget - target.size / 2 < this.sposY
